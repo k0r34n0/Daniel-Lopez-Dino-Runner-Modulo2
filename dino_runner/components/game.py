@@ -2,6 +2,7 @@ from calendar import c
 from ctypes import sizeof
 import pygame
 from dino_runner.components.dinosaur import Dinosaur
+from dino_runner.components.obstacles import obstacle_manager
 from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
 
 from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, FONT_STYLE
@@ -82,10 +83,10 @@ class Game:
         self.generic_text(text, 1000, 50) """
 
     def update_score(self):
-        self.score += 1
-
-        if self.score % 100 == 0 and self.game_speed < 700:
-            self.game_speed += 5
+            self.score += 1
+            if self.score % 100 == 0 and self.game_speed < 700:
+                self.game_speed += 5
+      
 
 
     def handle_events_on_menu(self):
@@ -104,16 +105,29 @@ class Game:
         if self.death_count == 0:
             self.generic_text('Press any key to start...', half_screen_width -180, half_screen_heigth)
         else:
+            self.screen.blit(ICON, (half_screen_width -40, half_screen_heigth -50))
+            self.generic_text('GAME OVER :c', half_screen_width -100, half_screen_heigth -100)
+            self.generic_text('Press any key to try again...', half_screen_width -180, half_screen_heigth -150)
+            self.draw_score_death()
+            self.draw_death_count()
                 
-            self.screen.blit(ICON, (half_screen_width +80, half_screen_heigth -50))
-            self.generic_text('GAME OVER :c', half_screen_width -150, half_screen_heigth -10)
-            print(self.death_count)
-            print(self.score)
-            
-
 
         pygame.display.update()
         self.handle_events_on_menu()
+
+    def draw_score_death(self):
+        font = pygame.font.Font(FONT_STYLE, 30)
+        text = font.render(f'Score: {self.score} ', True, (0, 0, 0))
+        text_rec = text.get_rect()
+        text_rec.center = (1000,50)
+        self.screen.blit(text, text_rec)
+
+    def draw_death_count(self):
+        font = pygame.font.Font(FONT_STYLE, 30)
+        text = font.render(f'Your kill count is: {self.death_count} ', True, (0, 0, 0))
+        text_rec = text.get_rect()
+        text_rec.center = (150,50)
+        self.screen.blit(text, text_rec)
 
     def generic_text(self, text, x, y):
         self.text = text
