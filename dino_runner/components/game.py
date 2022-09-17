@@ -1,6 +1,4 @@
-from calendar import c
-from ctypes import sizeof
-from distutils import core
+
 from time import time
 import pygame
 from dino_runner.components.dinosaur import Dinosaur
@@ -14,6 +12,7 @@ from dino_runner.utils.constants import BG, DEFAULT_TYPE, ICON, SCREEN_HEIGHT, S
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
         pygame.display.set_caption(TITLE)
         pygame.display.set_icon(ICON)
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -27,7 +26,9 @@ class Game:
         self.power_up_manager = PowerUpManager()
         self.running = False
         self.score = 0
+        self.higher_score = 0
         self.death_count = 0
+        
 
     def execute(self):
         self.running = True
@@ -63,7 +64,7 @@ class Game:
 
     def draw(self):
         self.clock.tick(FPS)
-        self.screen.fill((209, 189, 131))
+        self.screen.fill((247, 229, 167))
         self.draw_background()
         self.draw_score()
         self.draw_power_up_time()
@@ -92,20 +93,36 @@ class Game:
 
     def draw_power_up_time(self):
         if self.player.has_power_up:
+            self.draw_has_power_up_screen()
             time_to_show = round((self.player.power_time_up - pygame.time.get_ticks())/ 1000, 2) 
             if time_to_show >= 0:
                 font = pygame.font.Font(FONT_STYLE, 30)
                 text = f'{self.player.type.capitalize()} enabled for {time_to_show} seconds'
                 coords = (300, 50)
                 self.generic_text(text, coords)
+                
             else:
                 self.has_power_up = False
                 self.player.type = DEFAULT_TYPE
+                self.draw_has_not_power_up_screen()
 
+    def draw_has_power_up_screen(self):
+        self.screen.fill((243, 215, 119))
+        self.draw_background()
+        self.draw_score()
+
+    def draw_has_not_power_up_screen(self):
+        self.screen.fill((247, 229, 167))
+        self.draw_background()
+        self.draw_score()
+    
     def update_score(self):
             self.score += 1
             if self.score % 100 == 0 and self.game_speed < 700:
                 self.game_speed += 5
+
+            if self.score > self.higher_score:
+                self.higher_score = self.score
       
 
 
@@ -118,7 +135,7 @@ class Game:
                 self.run()
 
     def show_menu(self):
-        self.screen.fill((207, 155, 3))
+        self.screen.fill((232, 222, 187))
         half_screen_heigth = SCREEN_HEIGHT // 2
         half_screen_width = SCREEN_WIDTH // 2
 
@@ -130,10 +147,18 @@ class Game:
             self.generic_text('Press any key to try again...', (half_screen_width -180, half_screen_heigth -150))
             self.draw_score_death()
             self.draw_death_count()
+            self.draw_higher_score()
                 
 
         pygame.display.update()
         self.handle_events_on_menu()
+
+    def draw_higher_score(self):
+        half_screen_heigth = SCREEN_HEIGHT // 2
+        half_screen_width = SCREEN_WIDTH // 2
+        text = f'Higher Score: {self.higher_score} '
+        coords = (half_screen_width -120, half_screen_heigth +60)
+        self.generic_text(text, coords)
 
     def draw_score_death(self):
         text = f'Score: {self.score} '
