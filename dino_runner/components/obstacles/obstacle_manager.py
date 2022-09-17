@@ -2,7 +2,7 @@ import pygame
 import random
 from dino_runner.components.obstacles.cactus import Cactus
 
-from dino_runner.utils.constants import BIRD, SCREEN_WIDTH, SMALL_CACTUS, LARGE_CACTUS
+from dino_runner.utils.constants import BIRD, SCREEN_WIDTH, SHIELD_TYPE, SMALL_CACTUS, LARGE_CACTUS
 from dino_runner.components.obstacles.bird import Bird
 """  if len(self.obstacles) == 0:
             cactus_type = 'SMALL' if random.randint(0,1) == 0 else 'LARGE'
@@ -30,13 +30,14 @@ class ObstacleManager:
         for obstacle in self.obstacles:
             obstacle.update(game.game_speed, self.obstacles)
             if game.player.dino_rect.colliderect(obstacle.rect):
-                print("collition")
-                pygame.time.delay(1000)
-                game.death_count += 1
-                game.score = 0
-                game.game_speed = 20
-                game.playing = False
-                break
+                if game.player.type != SHIELD_TYPE:
+                    pygame.time.delay(1000)
+                    game.death_count += 1
+                    game.playing = False
+                    break
+                else:
+                    self.obstacles.remove(obstacle)
+            
 
 
     def draw(self, screen):
